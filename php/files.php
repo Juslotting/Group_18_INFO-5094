@@ -1,8 +1,11 @@
 <?php
 // connect to the database
-require_once("./includes/db_connection.php");
+$conn = mysqli_connect('localhost', 'lamp2user', 'info5094', 'paths');
 
-$db_conn = connectDB();
+$sql = "SELECT * FROM path_info";
+$result = mysqli_query($conn, $sql);
+
+$files = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 // Uploads files
 if (isset($_POST['save'])) { // if save button on the form is clicked
@@ -19,8 +22,8 @@ if (isset($_POST['save'])) { // if save button on the form is clicked
     $file = $_FILES['myfile']['tmp_name'];
     $size = $_FILES['myfile']['size'];
 
-    if (!in_array($extension, ['zip', 'pdf', 'docx'])) {
-        echo "You file extension must be .zip, .pdf or .docx";
+    if (!in_array($extension, ['csv'])) {
+        echo "You file extension must be .csv";
     } elseif ($_FILES['myfile']['size'] > 1000000) { // file shouldn't be larger than 1Megabyte
         echo "File too large!";
     } else {
@@ -34,4 +37,34 @@ if (isset($_POST['save'])) { // if save button on the form is clicked
             echo "Failed to upload file.";
         }
     }
+}
+
+// Downloads files
+if (isset($_GET['file_id'])) {
+    $id = $_GET['file_id'];
+
+    // fetch file to download from database
+    $sql = "SELECT * FROM files WHERE id=$id";
+    $result = mysqli_query($conn, $sql);
+
+    $file = mysqli_fetch_assoc($result);
+    $filepath = 'uploads/' . $file['name'];
+
+    if (file_exists($filepath)) {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . basename($filepath));
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize('uploads/' . $file['name']));
+        readfile('uploads/' . $file['name']);
+
+        // Now update downloads count
+        $newCount = $file['downloads'] + 1;
+        $updateQuery = "UPDATE files SET downloads=$newCount WHERE id=$id";
+        mysqli_query($conn, $updateQuery);
+        exit;
+    }
+
 }
