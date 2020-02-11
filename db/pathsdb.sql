@@ -3,7 +3,7 @@
 --Author: Group 18, Andi Ausrotas
 
 DROP DATABASE if exists paths;
-CREATE DATABASE if not exists 'paths' CHARACTER SET utf8;
+CREATE DATABASE if not exists paths CHARACTER SET utf8;
 
 DROP USER 'lamp2user'@'localhost';
 CREATE USER 'lamp2user'@'localhost' IDENTIFIED BY 'info5094';
@@ -15,6 +15,13 @@ drop table if exists path_info;
 drop table if exists path_beginning;
 drop table if exists path_ending;
 drop table if exists mid_points;
+
+CREATE TABLE if not exists files (
+    f_id int(11) NOT NULL AUTO_INCREMENT,
+    f_filename VARCHAR(30) NOT NULL,
+    f_location VARCHAR(30) NOT NULL,
+    CONSTRAINT files_pk PRIMARY KEY (f_id)
+);
 
 CREATE TABLE if not exists path_info (
     pi_id int(11) NOT NULL AUTO_INCREMENT,
