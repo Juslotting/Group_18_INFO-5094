@@ -1,4 +1,4 @@
-<?php include 'filesLogic.php';?>
+<?php require_once('files.php');?>
 <!DOCTYPE html>
 <html>
 <head>

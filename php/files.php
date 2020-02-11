@@ -1,70 +1,44 @@
 <?php
-// connect to the database
-$conn = mysqli_connect('localhost', 'lamp2user', 'info5094', 'paths');
-
-$sql = "SELECT * FROM path_info";
-$result = mysqli_query($conn, $sql);
-
-$files = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-// Uploads files
-if (isset($_POST['save'])) { // if save button on the form is clicked
-    // name of the uploaded file
-    $filename = $_FILES['myfile']['name'];
-
-    // destination of the file on the server
-    $destination = 'uploads/' . $filename;
-
-    // get the file extension
-    $extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-    // the physical file on a temporary uploads directory on the server
-    $file = $_FILES['myfile']['tmp_name'];
-    $size = $_FILES['myfile']['size'];
-
-    if (!in_array($extension, ['csv'])) {
-        echo "You file extension must be .csv";
-    } elseif ($_FILES['myfile']['size'] > 1000000) { // file shouldn't be larger than 1Megabyte
-        echo "File too large!";
+$target_dir = "uploads/";
+$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+$uploadOk = 1;
+$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+// Check if image file is a actual image or fake image
+if(isset($_POST["submit"])) {
+    $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+    if($check !== false) {
+        echo "File is an image - " . $check["mime"] . ".";
+        $uploadOk = 1;
     } else {
-        // move the uploaded (temporary) file to the specified destination
-        if (move_uploaded_file($file, $destination)) {
-            $sql = "INSERT INTO files (name, size, downloads) VALUES ('$filename', $size, 0)";
-            if (mysqli_query($conn, $sql)) {
-                echo "File uploaded successfully";
-            }
-        } else {
-            echo "Failed to upload file.";
-        }
+        echo "File is not an image.";
+        $uploadOk = 0;
     }
 }
-
-// Downloads files
-if (isset($_GET['file_id'])) {
-    $id = $_GET['file_id'];
-
-    // fetch file to download from database
-    $sql = "SELECT * FROM files WHERE id=$id";
-    $result = mysqli_query($conn, $sql);
-
-    $file = mysqli_fetch_assoc($result);
-    $filepath = 'uploads/' . $file['name'];
-
-    if (file_exists($filepath)) {
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename=' . basename($filepath));
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize('uploads/' . $file['name']));
-        readfile('uploads/' . $file['name']);
-
-        // Now update downloads count
-        $newCount = $file['downloads'] + 1;
-        $updateQuery = "UPDATE files SET downloads=$newCount WHERE id=$id";
-        mysqli_query($conn, $updateQuery);
-        exit;
-    }
-
+// Check if file already exists
+if (file_exists($target_file)) {
+    echo "Sorry, file already exists.";
+    $uploadOk = 0;
 }
+// Check file size
+if ($_FILES["fileToUpload"]["size"] > 500000) {
+    echo "Sorry, your file is too large.";
+    $uploadOk = 0;
+}
+// Allow certain file formats
+if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+&& $imageFileType != "gif" ) {
+    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+    $uploadOk = 0;
+}
+// Check if $uploadOk is set to 0 by an error
+if ($uploadOk == 0) {
+    echo "Sorry, your file was not uploaded.";
+// if everything is ok, try to upload file
+} else {
+    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+        echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+    } else {
+        echo "File upload failed.";
+    }
+}
+?>
