@@ -40,7 +40,7 @@ if (isset($_POST['save'])) {
 
       //checks if file is a csv
       if ($fileType == "csv") {
-          $storagename = "file.csv";
+          $storagename = $_FILES["file"]["name"];
           if(move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/" . $storagename)) {
           echo "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
           $f = fopen($targetdir.$storagename, "r");
@@ -104,11 +104,11 @@ if (isset($_POST['save'])) {
                 echo "File has been uploaded";
             };
           }
-          }
-          else {
-            echo "File could not be uploaded";
-          }
         }
+      else {
+        echo "File not uploaded";
+      }
+    }
       else {
         echo "File was wrong type";
       }
