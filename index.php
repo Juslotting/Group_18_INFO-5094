@@ -42,53 +42,58 @@ if (isset($_POST['save'])) {
       if ($fileType == "csv") {
           $storagename = $_FILES["file"]["name"];
           if(move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/" . $storagename)) {
-          echo "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
-          $f = fopen($targetdir.$storagename, "r");
-          $csv = fgetcsv($f, 1000);
-          print_r($csv);
+            echo "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
+            $f = fopen($targetdir.$storagename, "r");
+            $csv = array();
+            while (($line = fgetcsv($f)) !== FALSE) {
+              //$line[0] = 'Path x' in first iteration
+              array_push($csv,$line);
+            }
+            fclose($f);
+            echo $csv[0][0];
+            echo $csv[0][1];
+            echo $csv[0][2];
+            echo $csv[0][3];
 
-          $con = mysqli_connect("localhost","root","Grilledbilly08","paths");
-          if (mysqli_connect_errno()) {
-              echo "Unable to connect to MySQL! ". mysqli_connect_error();
-              exit();
-          }
+            $con= new PDO("mysql:host=127.0.0.1;dbname='paths'", 'root', 'Grilledbilly08');
+            $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-          $sqli = "INSERT INTO path_info (path_name,operating_frequency,pi_description,pi_note) VALUES (?,?,?,?);";
-          $stmt= $con->prepare($sqli);
-          $stmt->bindParam("ssss",$csv[0],$csv[1],$csv[2],$csv[3]);
-          $status = $stmt->execute();
-          if (!$status) {
-              echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
-              exit(1);
-          }
+            $sqli = "INSERT INTO path_info (path_name,operating_frequency,pi_description,pi_note) VALUES (:path_name,:operating_frequency,:pi_description,:pi_note)";
+            $stmt= $con->prepare($sqli);
+            $stmt->bindParam(":path_name",$csv[0][0]);
+            $stmt->bindParam(":operating_frequency",$csv[0][1]);
+            $stmt->bindParam(":pi_description",$csv[0][2]);
+            $stmt->bindParam(":pi_note",$csv[0][3]);
+            $status = $stmt->execute();
 
-          $sqli = "INSERT INTO path_beginning (pb_distance,pb_ground_height,pb_antenna,pb_cable_type,pb_cable_length) VALUES (?,?,?,?,?);";
-          $stmt= $con->prepare($sqli);
-          $stmt->bindParam("sssss",$csv[4],$csv[5],$csv[6],$csv[7],$csv[8]);
-          $status = $stmt->execute();
-          if (!$status) {
-              echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
-              exit(1);
-          }
+            $sqli = "INSERT INTO path_beginning (pb_distance,pb_ground_height,pb_antenna,pb_cable_type,pb_cable_length) VALUES (:pb_distance,:pb_ground_height,:pb_antenna,:pb_cable_type,:pb_cable_length)";
+            $stmt= $con->prepare($sqli);
+            $stmt->bindParam(":pb_distance",$csv[1][0]);
+            $stmt->bindParam(":pb_ground_height",$csv[1][1]);
+            $stmt->bindParam(":pb_antenna",$csv[1][2]);
+            $stmt->bindParam(":pb_cable_type",$csv[1][3]);
+            $stmt->bindParam(":pb_cable_length",$csv[1][4]);
+            $status = $stmt->execute();
 
-          $sqli = "INSERT INTO path_ending (pe_distance,pe_ground_height,pe_antenna,pe_cable_type,pe_cable_length) VALUES (?,?,?,?,?);";
-          $stmt= $con->prepare($sqli);
-          $stmt->bindParam("sssss",$csv[9],$csv[10],$csv[11],$csv[12],$csv[13]);
-          $status = $stmt->execute();
-          if (!$status) {
-              echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
-              exit(1);
-          }
-          /*for (){
-          $sqli = "INSERT INTO path_ending (md_distance,md_ground_height,md_terrain,md_obstr_height,md_obstr_type) VALUES (?,?,?,?,?);";
-          $stmt= $con->prepare($sqli);
-          $stmt->bindParam($csv[14],$csv[15],$csv[16],$csv[17],$csv[18]);
-          $status = $stmt->execute();
-          if (!$status) {
-              echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
-              exit(1);
-          }
-        }*/
+            $sqli = "INSERT INTO path_ending (pe_distance,pe_ground_height,pe_antenna,pe_cable_type,pe_cable_length) VALUES (:pe_distance,:pe_ground_height,:pe_antenna,:pe_cable_type,:pe_cable_length)";
+            $stmt= $con->prepare($sqli);
+            $stmt->bindParam(":pe_distance",$csv[2][0]);
+            $stmt->bindParam(":pe_ground_height",$csv[2][1]);
+            $stmt->bindParam(":pe_antenna",$csv[2][2]);
+            $stmt->bindParam(":pe_cable_type",$csv[2][3]);
+            $stmt->bindParam(":pe_cable_length",$csv[2][4]);
+            $status = $stmt->execute();
+
+            for($i = 3; $i > count($csv); $i++) {
+              $sqli = "INSERT INTO path_ending (md_distance,md_ground_height,md_terrain,md_obstr_height,md_obstr_type) VALUES (:md_distance,:md_ground_height,:md_terrain,:md_obstr_height,:md_obstr_type)";
+              $stmt= $con->prepare($sqli);
+              $stmt->bindParam(":md_distance",$csv[$i][0]);
+              $stmt->bindParam(":md_ground_height",$csv[$i][1]);
+              $stmt->bindParam(":md_terrain",$csv[$i][2]);
+              $stmt->bindParam(":md_obstr_height",$csv[$i][3]);
+              $stmt->bindParam("md_obstr_type",$csv[$i][4]);
+              $status = $stmt->execute();
+            }
           }
           else {
             echo "File could not be uploaded";
@@ -97,8 +102,8 @@ if (isset($_POST['save'])) {
       else {
         echo "File was wrong type";
       }
-      }
     }
+  }
 }
 ?>
 
