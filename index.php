@@ -20,7 +20,7 @@
  * Purpose:
  * Main file for project, connects to database, contains php/html and displays upload page.
  */
-
+error_reporting(-1);
 session_start();
 
 if (isset($_POST['save'])) {
@@ -43,56 +43,54 @@ if (isset($_POST['save'])) {
           $storagename = $_FILES["file"]["name"];
           if(move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/" . $storagename)) {
             echo "Stored in: " . "uploads/" . $_FILES["file"]["name"] . "<br />";
-            $f = fopen($targetdir.$storagename, "r");
-            $csv = array();
-            while (($line = fgetcsv($f)) !== FALSE) {
-              //$line[0] = 'Path x' in first iteration
-              array_push($csv,$line);
-            }
-            fclose($f);
-            echo $csv[0][0];
-            echo $csv[0][1];
-            echo $csv[0][2];
-            echo $csv[0][3];
+            //open file
+            if($f = fopen($targetdir.$storagename, "r")) {
+              $csv = array();
+              while (($line = fgetcsv($f)) !== FALSE) {
+                array_push($csv,$line);
+              }
+              fclose($f);
+              echo $csv[0][0];
 
-            $con= new PDO("mysql:host=127.0.0.1;dbname='paths'", 'lamp2user', 'info5094');
-            $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            $sqli = "INSERT INTO path_info (path_name,operating_frequency,pi_description,pi_note) VALUES (:path_name,:operating_frequency,:pi_description,:pi_note)";
-            $stmt= $con->prepare($sqli);
-            $stmt->bindParam(":path_name",$csv[0][0]);
-            $stmt->bindParam(":operating_frequency",$csv[0][1]);
-            $stmt->bindParam(":pi_description",$csv[0][2]);
-            $stmt->bindParam(":pi_note",$csv[0][3]);
-            $status = $stmt->execute();
-
-            $sqli = "INSERT INTO path_beginning (pb_distance,pb_ground_height,pb_antenna,pb_cable_type,pb_cable_length) VALUES (:pb_distance,:pb_ground_height,:pb_antenna,:pb_cable_type,:pb_cable_length)";
-            $stmt= $con->prepare($sqli);
-            $stmt->bindParam(":pb_distance",$csv[1][0]);
-            $stmt->bindParam(":pb_ground_height",$csv[1][1]);
-            $stmt->bindParam(":pb_antenna",$csv[1][2]);
-            $stmt->bindParam(":pb_cable_type",$csv[1][3]);
-            $stmt->bindParam(":pb_cable_length",$csv[1][4]);
-            $status = $stmt->execute();
-
-            $sqli = "INSERT INTO path_ending (pe_distance,pe_ground_height,pe_antenna,pe_cable_type,pe_cable_length) VALUES (:pe_distance,:pe_ground_height,:pe_antenna,:pe_cable_type,:pe_cable_length)";
-            $stmt= $con->prepare($sqli);
-            $stmt->bindParam(":pe_distance",$csv[2][0]);
-            $stmt->bindParam(":pe_ground_height",$csv[2][1]);
-            $stmt->bindParam(":pe_antenna",$csv[2][2]);
-            $stmt->bindParam(":pe_cable_type",$csv[2][3]);
-            $stmt->bindParam(":pe_cable_length",$csv[2][4]);
-            $status = $stmt->execute();
-
-            for($i = 3; $i > count($csv); $i++) {
-              $sqli = "INSERT INTO path_ending (md_distance,md_ground_height,md_terrain,md_obstr_height,md_obstr_type) VALUES (:md_distance,:md_ground_height,:md_terrain,:md_obstr_height,:md_obstr_type)";
+              $con= new PDO("mysql:host=127.0.0.1;dbname='paths'", 'root', 'Grilledbilly08');
+              $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+              $sqli = "INSERT INTO path_info (path_name,operating_frequency,pi_description,pi_note) VALUES (:path_name,:operating_frequency,:pi_description,:pi_note)";
               $stmt= $con->prepare($sqli);
-              $stmt->bindParam(":md_distance",$csv[$i][0]);
-              $stmt->bindParam(":md_ground_height",$csv[$i][1]);
-              $stmt->bindParam(":md_terrain",$csv[$i][2]);
-              $stmt->bindParam(":md_obstr_height",$csv[$i][3]);
-              $stmt->bindParam("md_obstr_type",$csv[$i][4]);
+              $stmt->bindParam(":path_name",$csv[0][0]);
+              $stmt->bindParam(":operating_frequency",$csv[0][1]);
+              $stmt->bindParam(":pi_description",$csv[0][2]);
+              $stmt->bindParam(":pi_note",$csv[0][3]);
               $status = $stmt->execute();
+
+              $sqli = "INSERT INTO path_beginning (pb_distance,pb_ground_height,pb_antenna,pb_cable_type,pb_cable_length) VALUES (:pb_distance,:pb_ground_height,:pb_antenna,:pb_cable_type,:pb_cable_length)";
+              $stmt= $con->prepare($sqli);
+              $stmt->bindParam(":pb_distance",$csv[1][0]);
+              $stmt->bindParam(":pb_ground_height",$csv[1][1]);
+              $stmt->bindParam(":pb_antenna",$csv[1][2]);
+              $stmt->bindParam(":pb_cable_type",$csv[1][3]);
+              $stmt->bindParam(":pb_cable_length",$csv[1][4]);
+              $status = $stmt->execute();
+
+              $sqli = "INSERT INTO path_ending (pe_distance,pe_ground_height,pe_antenna,pe_cable_type,pe_cable_length) VALUES (:pe_distance,:pe_ground_height,:pe_antenna,:pe_cable_type,:pe_cable_length)";
+              $stmt= $con->prepare($sqli);
+              $stmt->bindParam(":pe_distance",$csv[2][0]);
+              $stmt->bindParam(":pe_ground_height",$csv[2][1]);
+              $stmt->bindParam(":pe_antenna",$csv[2][2]);
+              $stmt->bindParam(":pe_cable_type",$csv[2][3]);
+              $stmt->bindParam(":pe_cable_length",$csv[2][4]);
+              $status = $stmt->execute();
+
+              for($i = 3; $i < 17; $i++) {
+                $sqli = "INSERT INTO path_ending (md_distance,md_ground_height,md_terrain,md_obstr_height,md_obstr_type) VALUES (:md_distance,:md_ground_height,:md_terrain,:md_obstr_height,:md_obstr_type)";
+                $stmt= $con->prepare($sqli);
+                $stmt->bindParam(":md_distance",$csv[$i][0]);
+                $stmt->bindParam(":md_ground_height",$csv[$i][1]);
+                $stmt->bindParam(":md_terrain",$csv[$i][2]);
+                $stmt->bindParam(":md_obstr_height",$csv[$i][3]);
+                $stmt->bindParam("md_obstr_type",$csv[$i][4]);
+                $status = $stmt->execute();
+              }
             }
           }
           else {
@@ -106,14 +104,18 @@ if (isset($_POST['save'])) {
   }
 }
 ?>
-
+<head>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<div>
 <h1>Upload and Download</h1>
 <p>Select csv file below, and then click Upload</p>
 <form class="form" method="post" action="" enctype="multipart/form-data">
-<label class="label">File:</label>
-<input type="file" name="file" class="input"> <br/>
-<button type="submit" name="save" class="btn"><i class="fa fa-upload fw-fa"></i> Upload</button>
+    <label class="label">File: </label>
+    <input type="file" name="file" class="input"> <br /><br />
+    <button type="submit" name="save" class="btn"><i class="fa fa-upload fw-fa"></i> Upload</button>
 </form>
+</div>
 
 
 <?php

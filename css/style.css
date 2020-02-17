@@ -1,0 +1,42 @@
+body {
+      background-color: black;
+}
+
+div{
+     background-color: #ffffff;
+     padding-bottom: 20px;
+     margin: auto;
+}
+
+h1 {
+     color: #0000e6;
+     font-size: 4em;
+     text-align: center;
+     font-style: italic;
+     text-shadow: 2px 2px 5px red;
+}
+
+p {
+     color: purple;
+     font-size: 2em;
+     text-align: center;
+     font-style: italic;
+}
+
+.label{
+     font-style: italic;
+     font-size: 2em;
+}
+
+input {
+      width: 50%;
+}
+
+.btn{
+     background-color: #ff3399;
+     padding: 25px 42px;
+     text-align: center;
+     font-size: 26px;
+     border-radius: 10px;
+     color: black;
+}
