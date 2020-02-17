@@ -62,6 +62,13 @@ if (isset($_POST['save'])) {
               $stmt->bindParam(":pi_description",$csv[0][2]);
               $stmt->bindParam(":pi_note",$csv[0][3]);
               $status = $stmt->execute();
+              if (!$status) {
+                  echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
+                  exit(1);
+              }
+              else {
+                echo "Insert successful";
+              }
 
               $sqli = "INSERT INTO path_beginning (pb_distance,pb_ground_height,pb_antenna,pb_cable_type,pb_cable_length) VALUES (:pb_distance,:pb_ground_height,:pb_antenna,:pb_cable_type,:pb_cable_length)";
               $stmt= $con->prepare($sqli);
@@ -71,6 +78,13 @@ if (isset($_POST['save'])) {
               $stmt->bindParam(":pb_cable_type",$csv[1][3]);
               $stmt->bindParam(":pb_cable_length",$csv[1][4]);
               $status = $stmt->execute();
+              if (!$status) {
+                  echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
+                  exit(1);
+              }
+              else {
+                echo "Insert successful";
+              }
 
               $sqli = "INSERT INTO path_ending (pe_distance,pe_ground_height,pe_antenna,pe_cable_type,pe_cable_length) VALUES (:pe_distance,:pe_ground_height,:pe_antenna,:pe_cable_type,:pe_cable_length)";
               $stmt= $con->prepare($sqli);
@@ -80,6 +94,13 @@ if (isset($_POST['save'])) {
               $stmt->bindParam(":pe_cable_type",$csv[2][3]);
               $stmt->bindParam(":pe_cable_length",$csv[2][4]);
               $status = $stmt->execute();
+              if (!$status) {
+                  echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
+                  exit(1);
+              }
+              else {
+                echo "Insert successful";
+              }
 
               for($i = 3; $i < 17; $i++) {
                 $sqli = "INSERT INTO path_ending (md_distance,md_ground_height,md_terrain,md_obstr_height,md_obstr_type) VALUES (:md_distance,:md_ground_height,:md_terrain,:md_obstr_height,:md_obstr_type)";
@@ -90,6 +111,13 @@ if (isset($_POST['save'])) {
                 $stmt->bindParam(":md_obstr_height",$csv[$i][3]);
                 $stmt->bindParam("md_obstr_type",$csv[$i][4]);
                 $status = $stmt->execute();
+                if (!$status) {
+                    echo "Error ".$stmt->errorCode()."\nMessage ".implode($stmt->errorInfo())."\n";
+                    exit(1);
+                }
+                else {
+                  echo "Insert successful";
+                }
               }
             }
           }
