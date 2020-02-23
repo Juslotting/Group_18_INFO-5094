@@ -53,7 +53,7 @@ if (isset($_POST['save'])) {
               echo $csv[0][0];
 
 
-              $con= new PDO("mysql:host=127.0.0.1;dbname='paths'", 'root', 'Grilledbilly08');
+              $con= new PDO("mysql:host=127.0.0.1;dbname='paths'", 'lamp2user', 'info5094');
               $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
               $sqli = "INSERT INTO path_info (path_name,operating_frequency,pi_description,pi_note) VALUES (:path_name,:operating_frequency,:pi_description,:pi_note)";
               $stmt= $con->prepare($sqli);
